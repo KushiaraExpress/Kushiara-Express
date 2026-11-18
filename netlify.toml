@@ -1,0 +1,44 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Dynamic OpenGraph / Twitter Card / JSON-LD Pre-rendering for Social Crawlers & Direct News Links
+[[redirects]]
+  from = "/news/*"
+  to = "/.netlify/functions/og-meta"
+  status = 200
+  force = true
+  conditions = { Role = ["anonymous"] }
+
+# Notice: For standard browsers, SPA fallback still works cleanly via og-meta returning the built index.html shell with injected OG tags,
+# OR crawler-only rewrite. In netlify/functions/og-meta.ts we serve the full HTML shell with injected article OG metadata so BOTH
+# Facebook/WhatsApp/X crawlers AND human browsers work seamlessly on direct visits!
+
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/.netlify/functions/sitemap"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Security & Caching Headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
